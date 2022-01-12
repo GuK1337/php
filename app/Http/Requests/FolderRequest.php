@@ -26,7 +26,7 @@ class FolderRequest extends FormRequest
     {
         $rules = [
             'name'=> 'required|string',
-            'parent'=> 'string',
+            'parent'=> 'int',
             'users'=> 'array'
         ];
 

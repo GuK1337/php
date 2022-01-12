@@ -17,7 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('register',[\App\Http\Controllers\Auth\RegisterController::class, 'create']);
 Route::post('login',[\App\Http\Controllers\Auth\LoginController::class, 'login1']);
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::post('folder', [\App\Http\Controllers\FolderController::class, 'store']);
-    Route::get('folders', [\App\Http\Controllers\FolderController::class, 'index']);
+//    Route::post('folder', [\App\Http\Controllers\FolderController::class, 'store']);
+//    Route::get('folders', [\App\Http\Controllers\FolderController::class, 'index']);
+//    Route::get('folder', [\App\Http\Controllers\FolderController::class, 'show']);
+    Route::resource('/folders', 'FolderController')->only([
+        'index', 'show', 'store', 'update', 'destroy', 'create',
+        ]);
 });
 
