@@ -38,4 +38,12 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function convertExceptionToArray(Throwable $e)
+    {
+        return  [
+            'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
+            'success' => false,
+        ];
+    }
 }

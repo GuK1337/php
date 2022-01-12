@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('folder', [\App\Http\Controllers\FolderController::class, 'store']);
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('register',[\App\Http\Controllers\Auth\RegisterController::class, 'create']);
+Route::post('login',[\App\Http\Controllers\Auth\LoginController::class, 'login1']);
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('folder', [\App\Http\Controllers\FolderController::class, 'store']);
+    Route::get('folders', [\App\Http\Controllers\FolderController::class, 'index']);
 });
+
