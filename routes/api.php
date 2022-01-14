@@ -21,7 +21,12 @@ Route::group(['middleware' => 'auth:api'], function () {
 //    Route::get('folders', [\App\Http\Controllers\FolderController::class, 'index']);
 //    Route::get('folder', [\App\Http\Controllers\FolderController::class, 'show']);
     Route::resource('/folders', 'FolderController')->only([
-        'index', 'show', 'store', 'update', 'destroy', 'create',
+        'index', 'show', 'store', 'update', 'destroy',
         ]);
+//    Route::resource('/files', 'FileController')->only([
+//        'index', 'show', 'store', 'update', 'destroy',
+//    ]);
+        Route::post('/folders/{folder_id}/files',[\App\Http\Controllers\FileController::class, 'store']);
+        Route::post('/folders/{folder_id}/files',[\App\Http\Controllers\FileController::class, 'store']);
 });
 

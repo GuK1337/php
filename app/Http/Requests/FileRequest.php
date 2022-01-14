@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FolderRequest extends FormRequest
+class FileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,12 +21,11 @@ class FolderRequest extends FormRequest
      *
      * @return array
      */
-    public function rules(Request $request)
+    public function rules()
     {
         $rules = [
-            'name'=> 'required|string',
             'parent'=> 'int',
-            'users'=> 'array'
+            'users'=> 'array',
         ];
 
         switch ($this->getMethod()){
@@ -35,9 +33,5 @@ class FolderRequest extends FormRequest
             case 'POST':
                 return $rules;
         }
-
-
     }
-
-
 }

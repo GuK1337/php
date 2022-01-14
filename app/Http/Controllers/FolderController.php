@@ -15,7 +15,15 @@ class FolderController extends BaseController
 {
     public function index()
     {
-        return Folder::all();
+        $folders = Folder::all()->toArray();
+        $userFolders = [];
+        foreach ($folders as $value){
+            if (in_array(Auth::id(), json_decode($value['users']))){
+                $userFolders[] = $value;
+            }
+
+        }
+        return  $userFolders;
     }
     public function store(FolderRequest $request)
     {
@@ -38,11 +46,11 @@ class FolderController extends BaseController
     {
         $folder = Folder::findOrFail($folder['id']);
         if(in_array(Auth::id(), json_decode($folder['users']))){
-//            return response()->json([
-//                'success' => true,
-//                'folder' => $folder,
-//                'message' => null
-//            ], 200);
+            return response()->json([
+                'success' => true,
+                'folder' => $folder,
+                'message' => null
+            ], 200);
         }
         return response()->json([
             'success' => false,
@@ -50,29 +58,67 @@ class FolderController extends BaseController
         ], 403);
     }
 
-    public function update(Request $request, String $id): Folder
+    public function update(Request $request, String $id)
     {
-//        $folder = Folder::findOrFail($id);
-//        if(!in_array(Auth::id(), json_decode($folder['users']))){
-//            return response()->json([
-//                'success' => false,
-//                'message' => 'Access denied'
-//            ], 403);
-//        }
-        $user = User::where('email', $request->email)->first();
-        $folders = Folder::where('parent_id', '2');
-        return Folder::where('parent_id', '2')->all;
 
-//        if(Folder::where('parent_id', $request['parent']) )
-//
-//        $folder->fill($request->except(['folder_id']));
-//        $folder->save();
-//        return response()->json($folder);
+
+        $folder = Folder::findOrFail($id);
+        if(!in_array(Auth::id(), json_decode($folder['users']))){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+
+        $folder->fill($request->only(['name','parent']));
+        $folder->fill([
+            'name' => $this->getFolderName($folder['name'], $folder['id'], $request['parent']),
+        ]);
+        $folder->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'success'
+        ]);
     }
 
-    public function destroy(Folder $folder,$id)
+    public function destroy(Request $request,$id)
     {
         $folder = Folder::findOrFail($id);
-        if($folder->delete()) return response(null, 204);
+        if(!in_array(Auth::id(), json_decode($folder['users']))){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        if($folder->delete())
+            return response()->json([
+                'success' => true,
+                'message' => 'Success'
+            ], 200);
+    }
+
+    public function getFolderName(String $oldName,String $id, string $parent){
+        $anotherFolders = Folder::where('parent', $parent)->get()->toArray();
+        $newName = $oldName;
+        if (!empty($anotherFolders)){
+            $hasSameName = false;
+            foreach ($anotherFolders as $value){
+                if ($oldName == $value['name'] AND $id != $value['id']){
+                    $hasSameName = true;
+                }
+            }
+            if ($hasSameName){
+                $numberStr = substr($oldName, -3);
+                if(preg_match('/\(\d+\)/', $numberStr) == 1){
+                    preg_match('/\d+/',$numberStr, $number);
+                    $val = (int)$number[1] + 1;
+                    $newName = substr($oldName,0,strlen($oldName) - 3).'('.$val.')';
+                }
+                else{
+                    $newName = $oldName.'(1)';
+                }
+            }
+        }
+        return  $newName;
     }
 }
