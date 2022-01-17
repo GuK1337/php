@@ -118,6 +118,25 @@ class FolderController extends BaseController
                     $newName = $oldName.'(1)';
                 }
             }
+
+            while ($hasSameName){
+                $hasSameName = false;
+                $numberStr = substr($oldName, -3);
+                if(preg_match('/\(\d+\)/', $numberStr) == 1){
+                    preg_match('/\d+/',$numberStr, $number);
+
+                    $val = (int)$number[0] + 1;
+                    $newName = substr($newName,0,strlen($oldName) - 3).'('.$val.')';
+                }
+                else{
+                    $newName = $newName.'(1)';
+                }
+                foreach ($anotherFolders as $value){
+                    if ($newName == $value['name']){
+                        $hasSameName = true;
+                    }
+                }
+            }
         }
         return  $newName;
     }

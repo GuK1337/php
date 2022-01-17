@@ -26,7 +26,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 //    Route::resource('/files', 'FileController')->only([
 //        'index', 'show', 'store', 'update', 'destroy',
 //    ]);
-        Route::post('/folders/{folder_id}/files',[\App\Http\Controllers\FileController::class, 'store']);
-        Route::post('/folders/{folder_id}/files',[\App\Http\Controllers\FileController::class, 'store']);
+    Route::resource('/folders/{folder_id}/files', 'FolderController')->only([
+        'index', 'show', 'store', 'update', 'destroy',
+    ]);
 });
 

@@ -6,9 +6,13 @@ use App\Http\Requests\FileRequest;
 use App\Models\Folder;
 use App\Models\File;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Exception;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class FileController extends Controller
 {
@@ -19,7 +23,8 @@ class FileController extends Controller
      */
     public function index()
     {
-        //
+
+
     }
 
     /**
@@ -61,7 +66,7 @@ class FileController extends Controller
             $name = $file->getClientOriginalName();
             try{
 
-                $fileName = $file->store(null, ['disk'=>'local']);
+                $fileName = $file->store(null, ['public'=>'local']);
                 $cratedFile = File::create([
                     'name' =>  $this->getFileName($name, $folder['id']),
                     'folder_id' => $folder['id'],
@@ -89,18 +94,37 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\File  $file
-     * @return \Illuminate\Http\Response
+     * @param File $file
+     * @return BinaryFileResponse|JsonResponse
      */
-    public function show(File $file)
+    public function show(File $file): BinaryFileResponse | JsonResponse
     {
-        //
+        $folder = Folder::findOrFail($file['folder_id']);
+        File::where('folder_id', $parent)->get()->toArray();
+        if(!in_array(Auth::id(), json_decode($folder['users']))){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        if (Storage::disk('public')->exists($file['path'])) {
+            $filePath = public_path($file['path']);
+            $ext = pathinfo( $file['name'], PATHINFO_EXTENSION);
+            $headers = ['Content-Type: application/'.$ext];
+            return response()->download($filePath, $file['name'], $headers);
+        }
+        else{
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+            ]);
+        }
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\File  $file
+     * @param File $file
      * @return \Illuminate\Http\Response
      */
     public function edit(File $file)
@@ -112,7 +136,7 @@ class FileController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\File  $file
+     * @param File $file
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, File $file)
@@ -123,12 +147,22 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\File  $file
+     * @param File $file
      * @return \Illuminate\Http\Response
      */
     public function destroy(File $file)
     {
-        //
+        if(!in_array(Auth::id(), json_decode($file['users']))){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        if($file->delete())
+            return response()->json([
+                'success' => true,
+                'message' => 'Success'
+            ], 200);
     }
 
     public function getFileName(String $oldName, string $parent): string
