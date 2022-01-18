@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Requests\FileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,8 +27,14 @@ Route::group(['middleware' => 'auth:api'], function () {
 //    Route::resource('/files', 'FileController')->only([
 //        'index', 'show', 'store', 'update', 'destroy',
 //    ]);
-    Route::resource('/folders/{folder_id}/files', 'FolderController')->only([
-        'index', 'show', 'store', 'update', 'destroy',
-    ]);
+//    Route::resource('/folders/{folder_id}/files', 'FolderController')->only([
+//        'index', 'show', 'store', 'update', 'destroy',
+//    ]);
+    Route::post('/folders/{folderId}/files', 'FileController@store');
+    Route::get('/folders/{folderId}/files/{fileId}', 'FileController@show');
+    Route::delete('/folders/{folderId}/files/{fileId}', 'FileController@destroy');
+    Route::get('/folders/{folderId}/files', 'FileController@index');
+    Route::patch('/folders/{folderId}/files/{fileId}', 'FileController@edit');
+    Route::post('/folders/{folderId}/files/{fileId}', 'FileController@addUser');
 });
 

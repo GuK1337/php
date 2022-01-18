@@ -24,7 +24,6 @@ class FileRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'parent'=> 'int',
             'users'=> 'array',
         ];
 

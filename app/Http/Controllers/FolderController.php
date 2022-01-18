@@ -63,7 +63,7 @@ class FolderController extends BaseController
 
 
         $folder = Folder::findOrFail($id);
-        if(!in_array(Auth::id(), json_decode($folder['users']))){
+        if(!in_array(Auth::id(), json_decode($folder['users'])) and $folder['users'] != null){
             return response()->json([
                 'success' => false,
                 'message' => 'Access denied'
@@ -84,7 +84,7 @@ class FolderController extends BaseController
     public function destroy(Request $request,$id)
     {
         $folder = Folder::findOrFail($id);
-        if(!in_array(Auth::id(), json_decode($folder['users']))){
+        if(!in_array(Auth::id(), json_decode($folder['users'])) and $folder['users'] != null){
             return response()->json([
                 'success' => false,
                 'message' => 'Access denied'

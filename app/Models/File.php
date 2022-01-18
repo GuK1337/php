@@ -17,6 +17,7 @@ class File extends Model
         'folder_id',
         'users',
         'path',
+        'author'
     ];
     protected $hidden= ['created_at', 'updated_at'];
 }
