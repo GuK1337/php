@@ -393,4 +393,56 @@ class FileController extends Controller
         }
         return response()->json($users);
     }
+
+
+    public function removeUser(Request $request, String $folderId, String $fileId)
+    {
+        $request->validate([
+            'email'=>'email',
+            'all'=>'true',
+        ]);
+        $value = $request-> all();
+        $folder = Folder::findOrFail($folderId);
+        $files = File::where([
+            ['folder_id','=', $folder['id']],
+            ['id','=',  $fileId],
+        ])->get();
+        if(count($files->toArray()) == 0){
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+            ]);
+        }
+        $file = $files[0];
+        if(Auth::id() != $file['author']){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        else{
+            if(array_key_exists('email', $value)){
+                $userList = json_decode($file['users']);
+                $user = User::where('email',$value['email'])->get()[0];
+
+                if( $userList != null and in_array($user['id'], $userList,) and $file['author'] != $user['id']){
+
+                    array_splice($userList, array_search($user['id'],$userList), 1);
+                    $file['users'] = json_encode($userList);
+                    $file->save();
+                }
+            }
+        }
+        $users = [];
+        $userList = json_decode($file['users']);
+        foreach ($userList as $userId){
+            $userData = User::findOrFail($userId);
+            $users[] = [
+                'fullname'=>$userData['name'],
+                'email'=>$userData['email'],
+                'type'=>$userData['id'] == $file['author'] ? 'author' : 'co-author'
+            ];
+        }
+        return response()->json($users);
+    }
 }

@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/folders/{folderId}/files/{fileId}', 'FileController@destroy');
     Route::get('/folders/{folderId}/files', 'FileController@index');
     Route::patch('/folders/{folderId}/files/{fileId}', 'FileController@edit');
-    Route::post('/folders/{folderId}/files/{fileId}', 'FileController@addUser');
+    Route::put('/folders/{folderId}/files/{fileId}/accesses', 'FileController@addUser');
+    Route::delete('/folders/{folderId}/files/{fileId}/accesses', 'FileController@removeUser');
 });
 

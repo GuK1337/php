@@ -140,4 +140,89 @@ class FolderController extends BaseController
         }
         return  $newName;
     }
+
+    public function addUser(Request $request, String $folderId)
+    {
+        $request->validate([
+            'email'=>'email',
+            'all'=>'true',
+        ]);
+        $value = $request-> all();
+        $folder = Folder::findOrFail($folderId);
+        if(Auth::id() != $folder['author']){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        if(array_key_exists('all', $value) and $value['all'] == true){
+            $folder['users'] == null;
+            $folder->save();
+        }
+        else{
+            if(array_key_exists('email', $value)){
+                $userList = json_decode($folder['users']);
+                $user = User::where('email',$value['email'])->get()[0];
+                if($userList == null){
+                    $userList = [Auth::id()];
+                }
+                if(!in_array($user['id'], $userList)){
+                    $userList[] = $user['id'];
+                    $folder['users'] = json_encode($userList);
+                    $folder->save();
+                }
+            }
+        }
+        $users = [];
+        $userList = json_decode($folder['users']);
+        foreach ($userList as $userId){
+            $userData = User::findOrFail($userId);
+            $users[] = [
+                'fullname'=>$userData['name'],
+                'email'=>$userData['email'],
+                'type'=>$userData['id'] == $folder['author'] ? 'author' : 'co-author'
+            ];
+        }
+        return response()->json($users);
+    }
+
+
+    public function removeUser(Request $request, String $folderId, String $fileId)
+    {
+        $request->validate([
+            'email'=>'email',
+        ]);
+        $value = $request-> all();
+        $folder = Folder::findOrFail($folderId);
+        if(Auth::id() != $folder['author']){
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+        else{
+            if(array_key_exists('email', $value)){
+                $userList = json_decode($folder['users']);
+                $user = User::where('email',$value['email'])->get()[0];
+
+                if( $userList != null and in_array($user['id'], $userList,) and $folder['author'] != $user['id']){
+                    array_splice($userList, array_search($user['id'],$userList), 1);
+                    $folder['users'] = json_encode($userList);
+                    $folder->save();
+                }
+            }
+        }
+        $users = [];
+        $userList = json_decode($folder['users']);
+        foreach ($userList as $userId){
+            $userData = User::findOrFail($userId);
+            $users[] = [
+                'fullname'=>$userData['name'],
+                'email'=>$userData['email'],
+                'type'=>$userData['id'] == $folder['author'] ? 'author' : 'co-author'
+            ];
+        }
+        return response()->json($users);
+    }
+
 }
