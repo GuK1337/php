@@ -44,7 +44,7 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    public function login1 (\Illuminate\Http\Request $request) {
+    public function login (\Illuminate\Http\Request $request) {
 
         $credentials = $request->only('email', 'password');
         if (!Auth::attempt($credentials)) {
@@ -66,6 +66,17 @@ class LoginController extends Controller
             'success' => true,
             'token' => $token->accessToken,
             'message' => null
+        ], 200);
+
+    }
+
+    public function logout (\Illuminate\Http\Request $request) {
+
+        Auth::logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'success'
         ], 200);
 
     }

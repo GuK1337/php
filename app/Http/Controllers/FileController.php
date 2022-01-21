@@ -58,7 +58,7 @@ class FileController extends Controller
                 foreach ($userList as $userId){
                     $userData = User::findOrFail($userId);
                     $users[] = [
-                        'fullname'=>$userData['name'],
+                        'fullname'=>$userData['first_name'].' '.$userData['last_name'],
                         'email'=>$userData['email'],
                         'type'=>$userData['id'] == $file['author'] ? 'author' : 'co-author'
                     ];
@@ -81,7 +81,7 @@ class FileController extends Controller
                 foreach ($userList as $userId){
                     $userData = User::findOrFail($userId);
                     $users[] = [
-                        'fullname'=>$userData['name'],
+                        'fullname'=>$userData['first_name'].' '.$userData['last_name'],
                         'email'=>$userData['email'],
                         'type'=>$userData['id'] == $file['author'] ? 'author' : 'co-author'
                     ];
@@ -152,6 +152,7 @@ class FileController extends Controller
                     'path' => $fileName,
                     'users'=> $value['users'],
                     'author' => $value['author'],
+                    'id'=> $this->generateRandomString(),
                 ]);
                 $createdFiles[] = [
                     'success' => true,
@@ -160,6 +161,7 @@ class FileController extends Controller
                     'name'=>  $cratedFile['name'],
                     'file_id'=>$cratedFile['id'],
                     'author' => $value['author'],
+                    'id'=> $this->generateRandomString(),
                 ];
             }
             catch(Exception|FileNotFoundException $ex) {
@@ -316,7 +318,7 @@ class FileController extends Controller
                 Log::info('old: '.$newName);
                 $nameWithoutExt = pathinfo( $newName, PATHINFO_FILENAME);
                 $ext = pathinfo( $newName, PATHINFO_EXTENSION);
-                $numberStr = preg_match('/\(\d+\)/', $nameWithoutExt, $str);
+                $numberStr = preg_match('/\(\d+\)$/', $nameWithoutExt, $str);
                 if($numberStr == 1){
                     preg_match('/\d+/',$str[0], $number);
 
@@ -386,7 +388,7 @@ class FileController extends Controller
         foreach ($userList as $userId){
             $userData = User::findOrFail($userId);
             $users[] = [
-                'fullname'=>$userData['name'],
+                'fullname'=>$userData['first_name'].' '.$userData['last_name'],
                 'email'=>$userData['email'],
                 'type'=>$userData['id'] == $file['author'] ? 'author' : 'co-author'
             ];
@@ -438,11 +440,21 @@ class FileController extends Controller
         foreach ($userList as $userId){
             $userData = User::findOrFail($userId);
             $users[] = [
-                'fullname'=>$userData['name'],
+                'fullname'=>$userData['first_name'].' '.$userData['last_name'],
                 'email'=>$userData['email'],
                 'type'=>$userData['id'] == $file['author'] ? 'author' : 'co-author'
             ];
         }
         return response()->json($users);
+    }
+
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }

@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('register',[\App\Http\Controllers\Auth\RegisterController::class, 'create']);
-Route::post('login',[\App\Http\Controllers\Auth\LoginController::class, 'login1']);
+Route::post('registration',[\App\Http\Controllers\Auth\RegisterController::class, 'create']);
+Route::post('authorization',[\App\Http\Controllers\Auth\LoginController::class, 'login']);
 Route::group(['middleware' => 'auth:api'], function () {
 //    Route::post('folder', [\App\Http\Controllers\FolderController::class, 'store']);
 //    Route::get('folders', [\App\Http\Controllers\FolderController::class, 'index']);
@@ -37,5 +37,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::patch('/folders/{folderId}/files/{fileId}', 'FileController@edit');
     Route::put('/folders/{folderId}/files/{fileId}/accesses', 'FileController@addUser');
     Route::delete('/folders/{folderId}/files/{fileId}/accesses', 'FileController@removeUser');
+    Route::put('/folders/{folderId}/accesses', 'FolderController@addUser');
+    Route::delete('/folders/{folderId}/accesses', 'FolderController@addUser');
+    Route::get('/disk', 'FolderController@getAllUserFiles');
+    Route::get('/shared', 'FolderController@getAllFiles');
+    Route::get('login',[\App\Http\Controllers\Auth\LoginController::class, 'logout']);
 });
 

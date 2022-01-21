@@ -46,4 +46,16 @@ class Handler extends ExceptionHandler
             'success' => false,
         ];
     }
+
+    protected function shouldReturnJson($request, Throwable $e)
+    {
+        return true;
+    }
+
+    protected function unauthenticated($request, $exception)
+    {
+        return $this->shouldReturnJson($request, $exception)
+            ? response()->json(['message' => $exception->getMessage(), 'success' => false,], 401)
+            : redirect()->guest($exception->redirectTo() ?? route('login'));
+    }
 }
